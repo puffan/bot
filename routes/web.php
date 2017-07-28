@@ -26,3 +26,5 @@ $app->get('/redis', function () use ($app) {
 });
 
 $app->get('ping', 'PingController@ping');
+
+$app->post('chats', 'ChatsController@chat');
