@@ -16,15 +16,15 @@ $app->get('/', function () use ($app) {
 });
 
 
-$app->get('/setredis', function () use ($app) {
-    Cache::put('lumen', 'Hello, puff.', 5);
-    return "done";
-});
+// $app->get('/setredis', function () use ($app) {
+//     Cache::put('lumen', 'Hello, puff.', 5);
+//     return "done";
+// });
 
-$app->get('/redis', function () use ($app) {
-    return Cache::get('lumen');
-});
+// $app->get('/redis', function () use ($app) {
+//     return Cache::get('lumen');
+// });
 
 $app->get('ping', 'PingController@ping');
 
-$app->post('chats', 'ChatsController@chat');
+$app->post('/v1/chats', 'ChatsController@chat');
