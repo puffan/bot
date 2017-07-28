@@ -14,3 +14,15 @@
 $app->get('/', function () use ($app) {
     return $app->version();
 });
+
+
+$app->get('/setredis', function () use ($app) {
+    Cache::put('lumen', 'Hello, puff.', 5);
+    return "done";
+});
+
+$app->get('/redis', function () use ($app) {
+    return Cache::get('lumen');
+});
+
+$app->get('ping', 'PingController@ping');
