@@ -29,6 +29,12 @@ $app->get('ping', 'PingController@ping');
 
 $app->post('/v1/chats', 'ChatsController@chat');
 
+
+
 $app->post('/v1/imchats', 'ChatsController@sendMsgToIM');
+
+$app->post('/v1/imgroup', 'ChatsController@createIMGroup');
+
+$app->post('/v1/imgroupcard', 'ChatsController@sendIMGroupCard');
 
 $app->get('/v1/intents', 'ChatsController@getIntent');
