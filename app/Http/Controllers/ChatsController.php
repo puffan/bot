@@ -30,7 +30,13 @@ class ChatsController extends Controller
     	$intent = $this->getIntentService($content);
 
     	if('找专家' == $intent){
-    		return $this->sendP2PMsgToIMService($to, $from, $content);
+    		// return $this->sendP2PMsgToIMService($to, $from, $content);
+    		//TODO1: create group
+    		//TODO2: send group card
+    		return "你想找专家吧";
+    	}else if('找知识' == $intent){
+    		//TODO: create knowledge card
+    		return "你想找知识吧";
     	}
 
     	return $intent;
@@ -39,7 +45,6 @@ class ChatsController extends Controller
     public function getIntent(Request $request){
     	return $this->getIntentService($request->input('content'));
     }
-
 
     /**
      * get intent
@@ -138,19 +143,21 @@ class ChatsController extends Controller
      * send im card
      */
     private function sendIMGroupCardService($from, $groupName, $groupId){
-    	$template = '<![CDATA[<imbody><content>{"cardContext":{"handlerUriAndroid":"{{GROUPID}}","handlerUriIOS":"{{GROUPID}}","isPCDisplay":"1","sourceUrl":""},"cardType":100,"digest":"","imgUrl":"","source":"","title":"{{GROUPNAME}}"}</content></imbody>]]>';
+    	$template = '<![CDATA[<imbody><content>{"cardContext":{"handlerUriAndroid":"","handlerUriIOS":"","isPCDisplay":"1","groupid":"{{GROUPID}}",sourceUrl":""},"cardType":100,"digest":"","imgUrl":"","source":"","title":"{{GROUPNAME}}"}</content></imbody>]]>';
 
         $content = str_replace("{{GROUPID}}", $groupId, $template);
-        $content = str_replace("{{GROUPNAME}}", $groupName, $template);
+        $content = str_replace("{{GROUPNAME}}", $groupName, $content);
 
     	$data = array(
 		    'senderAccount' => $from,
 		    'senderType' => 0,
 		    'msgType' => '2',
 		    'appID' => '3',
-		    "content" => $this->buildIMConent($content),
+		    "content" => base64_encode($content),
+		    "contentTypeForMobile" => '10',
+		    "groupID" => $groupId,
 		);
-
+		
 		$curl = new Curl();
 		$curl->setHeader('Content-Type', 'application/json');
 		$curl->post(self::ESERVER_BASE_URL.'/im', $data);
