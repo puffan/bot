@@ -9,12 +9,11 @@ use \Curl\Curl;
 class ChatsController extends Controller
 {
 	const ESERVER_BASE_URL = 'http://58.213.108.45:7801/esdk/rest/ec/eserver';
+	const ESPACE_GROUP_NAME_PREFIX = '[WeLink-On-Cloud] Experts for :';
 
 	public function chat(Request $request) {
-		$resources = array(
-		    "hello" => "world",
-		    "谢谢" => "不客气",
-		    "打开百度" => "http://www.baidu.com",
+		$expertsPool = array(
+		    "z00187187",
 	    );
 
     	$this->validate($request, [
@@ -32,11 +31,18 @@ class ChatsController extends Controller
     	if('找专家' == $intent){
     		// return $this->sendP2PMsgToIMService($to, $from, $content);
     		//TODO1: create group
+    		$newGroupName = self::ESPACE_GROUP_NAME_PREFIX.$from.'@'.time();
+    		$newGroupId = $this->createIMGroupService($newGroupName, $expertsPool, $from);
+
     		//TODO2: send group card
+    		$this->sendIMCardService($to, $from, $newGroupName, $newGroupId);
     		return "你想找专家吧";
     	}else if('找知识' == $intent){
     		//TODO: create knowledge card
     		return "你想找知识吧";
+    	}else{
+    		$defaultWords = '我只诞生了3天，还不太明白您的意思，WeCloud战队加油!';
+    		return $this->sendP2PMsgToIMService($to, $from, $defaultWords);
     	}
 
     	return $intent;
@@ -122,42 +128,43 @@ class ChatsController extends Controller
 		    'appID' => '3',
 		);
 
-		var_dump(json_encode($data));
-
 		$curl = new Curl();
 		$curl->setHeader('Content-Type', 'application/json');
 		$curl->post($endpoint, $data);
 		$curl->close();
-		return json_encode($curl->response);
+
+		$result = json_decode($curl->response->resultContext);
+		return $result->groupID;
     }
 
     public function sendIMGroupCard(Request $request){
     	$from = $request->input('from');
     	$groupName = $request->input('group_name');
+    	$to = $request->input('to');
     	$groupId = $request->input('group_id');
 
-    	return $this->sendIMGroupCardService($from, $groupName, $groupId);
+    	return $this->sendIMCardService($from, $to, $groupName, $groupId);
     }
 
     /*
      * send im card
      */
-    private function sendIMGroupCardService($from, $groupName, $groupId){
-    	$template = '<![CDATA[<imbody><content>{"cardContext":{"handlerUriAndroid":"","handlerUriIOS":"","isPCDisplay":"1","groupid":"{{GROUPID}}",sourceUrl":""},"cardType":100,"digest":"","imgUrl":"","source":"","title":"{{GROUPNAME}}"}</content></imbody>]]>';
+    private function sendIMCardService($from, $to, $groupName, $groupId){
+    	$template = '<![CDATA[<imbody><content>{"cardContext":{"handlerUriAndroid":"{{GROUPID}}","handlerUriIOS":"{{GROUPID}}","isPCDisplay":"1","sourceUrl":""},"cardType":100,"digest":"","imgUrl":"","source":"","title":"{{GROUPNAME}}"}</content></imbody>]]>';
 
         $content = str_replace("{{GROUPID}}", $groupId, $template);
         $content = str_replace("{{GROUPNAME}}", $groupName, $content);
 
     	$data = array(
 		    'senderAccount' => $from,
+		    'targetAccount' => $to,
 		    'senderType' => 0,
-		    'msgType' => '2',
+		    'msgType' => '0',
 		    'appID' => '3',
 		    "content" => base64_encode($content),
 		    "contentTypeForMobile" => '10',
-		    "groupID" => $groupId,
 		);
-		
+
 		$curl = new Curl();
 		$curl->setHeader('Content-Type', 'application/json');
 		$curl->post(self::ESERVER_BASE_URL.'/im', $data);
@@ -167,7 +174,6 @@ class ChatsController extends Controller
     private function buildIMConent($content){
     	$template = '<imbody><imagelist/><html/><content>{{content}}</content></imbody>';
     	$result = str_replace("{{content}}",$content, $template);
-
 
     	$result = str_replace("<","&lt;", $result);
     	$result = str_replace(">","&gt;", $result);
