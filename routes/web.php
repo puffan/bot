@@ -28,3 +28,7 @@ $app->get('/', function () use ($app) {
 $app->get('ping', 'PingController@ping');
 
 $app->post('/v1/chats', 'ChatsController@chat');
+
+$app->post('/v1/imchats', 'ChatsController@sendMsgToIM');
+
+$app->get('/v1/intents', 'ChatsController@getIntent');
