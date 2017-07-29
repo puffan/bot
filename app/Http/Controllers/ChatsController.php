@@ -138,7 +138,7 @@ class ChatsController extends Controller
      * send im card
      */
     private function sendIMGroupCardService($from, $groupName, $groupId){
-    	$template = '<![CDATA[<imbody><content>{"cardContext":{"handlerUriAndroid":"{{GROUPID}}","handlerUriIOS":"{{GROUPID}}","isPCDisplay":"1","sourceUrl":""},"cardType":1,"digest":"","imgUrl":"","source":"","title":"{{GROUPNAME}}"}</content></imbody>]]>';
+    	$template = '<![CDATA[<imbody><content>{"cardContext":{"handlerUriAndroid":"{{GROUPID}}","handlerUriIOS":"{{GROUPID}}","isPCDisplay":"1","sourceUrl":""},"cardType":100,"digest":"","imgUrl":"","source":"","title":"{{GROUPNAME}}"}</content></imbody>]]>';
 
         $content = str_replace("{{GROUPID}}", $groupId, $template);
         $content = str_replace("{{GROUPNAME}}", $groupName, $template);
