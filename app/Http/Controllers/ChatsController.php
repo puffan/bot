@@ -11,6 +11,7 @@ class ChatsController extends Controller
 {
 	const ESERVER_BASE_URL = 'http://58.213.108.45:7801/esdk/rest/ec/eserver';
 	const MS_INTENT_URL = 'https://southeastasia.api.cognitive.microsoft.com/luis/v2.0/apps/a2367e9b-eb53-428f-ab39-6649d7e67476';
+	const MS_INTENT_SCORE_BAR = 0.6;
 	const MS_KB_URL = 'https://westus.api.cognitive.microsoft.com/qnamaker/v2.0/knowledgebases/6243a453-88d2-4bce-a855-be626041b9ee/generateAnswer';
 
 	const ESPACE_GROUP_NAME_PREFIX = '[WeCloud-Experts-Online] ';
@@ -100,8 +101,9 @@ class ChatsController extends Controller
 			$result = $curl->response;
 			$curl->close();
 			$topScoringIntent = $result->topScoringIntent->intent;
+			$topScoringIntentScore = $result->topScoringIntent->score;
 
-			if( !isset($topScoringIntent )){
+			if( !isset($topScoringIntent) || !isset($topScoringIntentScore) || ($topScoringIntentScore <= self::MS_INTENT_SCORE_BAR) ) {
 				$topScoringIntent = 'None';
 			}
 
