@@ -38,3 +38,5 @@ $app->post('/v1/imgroup', 'ChatsController@createIMGroup');
 $app->post('/v1/imgroupcard', 'ChatsController@sendIMGroupCard');
 
 $app->get('/v1/intents', 'ChatsController@getIntent');
+
+$app->get('/v1/answers', 'ChatsController@getAnswer');

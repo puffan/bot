@@ -11,7 +11,8 @@ class ChatsController extends Controller
 {
 	const ESERVER_BASE_URL = 'http://58.213.108.45:7801/esdk/rest/ec/eserver';
 	const MS_INTENT_URL = 'https://southeastasia.api.cognitive.microsoft.com/luis/v2.0/apps/a2367e9b-eb53-428f-ab39-6649d7e67476';
-	
+	const MS_KB_URL = 'https://westus.api.cognitive.microsoft.com/qnamaker/v2.0/knowledgebases/6243a453-88d2-4bce-a855-be626041b9ee/generateAnswer';
+
 	const ESPACE_GROUP_NAME_PREFIX = '[WeCloud-Experts-Online] ';
 	const LAST_WORDS = '我只诞生了3天，还不太明白您的意思，我为WeCloud战队加油!';
 
@@ -55,14 +56,22 @@ class ChatsController extends Controller
     		$newGroupId = $this->createIMGroupService($newGroupName, $expertsPool, $from);
     		// send group card
     		$this->sendIMCardService($to, $from, $newGroupName, $newGroupId);
-    	}else if(self::INTENT_FIND_KNOWLEDGE == $intent){
-    		// TODO:create knowledge card
     	}else if(self::INTENT_GREETING == $intent){
     		// TODO:say hello
-    		return $this->sendP2PMsgToIMService($to, $from, self::GREETING_WORDS);
+    		return $this->sendP2PMsgToIMService($to, $from, $this->randomItemInArray(ChatsController::$greeting_array));
     	}else{
-    		return $this->sendP2PMsgToIMService($to, $from, self::LAST_WORDS);
+    		$answer = $this->getKBService($content);
+
+    		if( isset($answer) ){
+    			return $this->sendP2PMsgToIMService($to, $from, $answer);
+    		}else{
+    			return $this->sendP2PMsgToIMService($to, $from, self::LAST_WORDS);
+    		}
     	}
+
+    	// else if(self::INTENT_FIND_KNOWLEDGE == $intent){
+    	// 	// TODO:create knowledge card
+    	// }
     	return $intent;
     }
 
@@ -71,7 +80,7 @@ class ChatsController extends Controller
      *
      */
     private function getIntentService($content){
-    	$cache_key_intent = self::CACHE_KEY_PREFIX.md5($content);
+    	$cache_key_intent = self::CACHE_KEY_PREFIX.'_INTENT_'.md5($content);
     	$topScoringIntent = "None";
 
     	$intentInCache = Cache::get($cache_key_intent);
@@ -91,9 +100,49 @@ class ChatsController extends Controller
 			$result = $curl->response;
 			$curl->close();
 			$topScoringIntent = $result->topScoringIntent->intent;
+
+			if( !isset($topScoringIntent )){
+				$topScoringIntent = 'None';
+			}
+
 			Cache::put($cache_key_intent, $topScoringIntent, 30);
     	}
 		return $topScoringIntent;
+    }
+
+    /**
+     * get knowledge base
+     *
+     */
+    private function getKBService($content){
+    	$cache_key_kb = self::CACHE_KEY_PREFIX.'_KB_'.md5($content);
+    	$topAnswer = "None";
+
+    	$answerInCache = Cache::get($cache_key_kb);
+
+    	if( isset($answerInCache) ){
+    		$topAnswer = $answerInCache;
+    	}else{
+    		$curl = new Curl();
+	    	$curl->setOpt ( CURLOPT_SSL_VERIFYPEER, false );
+	    	$curl->setHeader('Ocp-Apim-Subscription-Key', '2e7945235db74c999a6613af3b76b5f6');
+    	    $curl->setHeader('Content-Type', 'application/json');
+
+			$curl->POST(self::MS_KB_URL, array(
+			    'question' => $content,
+			));
+
+			$result = $curl->response;
+			$curl->close();
+			$topAnswer = $result->answers[0]->answer;
+
+			if( !isset($topAnswer) ){
+				$topAnswer = 'None';
+			}
+			Cache::put($cache_key_kb, $topAnswer, 30);
+    	}
+
+		return $topAnswer;
     }
 
     /**
@@ -176,6 +225,10 @@ class ChatsController extends Controller
 
     private function randomItemInArray( $array ){
     	return $array[rand(0, count($array)-1)];
+    }
+
+    public function getAnswer(Request $request){
+    	return $this->getKBService($request->input('content'));
     }
 
     public function getIntent(Request $request){
