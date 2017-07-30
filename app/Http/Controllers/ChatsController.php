@@ -11,9 +11,15 @@ class ChatsController extends Controller
 {
 	const ESERVER_BASE_URL = 'http://58.213.108.45:7801/esdk/rest/ec/eserver';
 	const MS_INTENT_URL = 'https://southeastasia.api.cognitive.microsoft.com/luis/v2.0/apps/a2367e9b-eb53-428f-ab39-6649d7e67476';
+	
 	const ESPACE_GROUP_NAME_PREFIX = '[WeCloud-Experts-Online] ';
-	const LAST_WORDS = '我只诞生了3天，还不太明白您的意思，WeCloud战队加油!';
-	const GREETING_WORDS = '您好! 我叫小薇，是你的小助手！';
+	const LAST_WORDS = '我只诞生了3天，还不太明白您的意思，我为WeCloud战队加油!';
+
+	public static $greeting_array = array(
+		'您好,今天天气不错，我可以为你做点什么呢？',
+		'您好，欢迎再次光临，您可以输入类似‘找专家’、‘XX技术方案’或者语音来向我求助！',
+		'您好，华为2017-HC大会即将召开，想咨询什么我可以做向导。',
+	);
 
 	const INTENT_FIND_EXPERTS = '找专家';
 	const INTENT_FIND_KNOWLEDGE = '找知识';
@@ -38,7 +44,7 @@ class ChatsController extends Controller
 
     	$greeting = $request->input("greeting");
     	if( isset($greeting) && $greeting === true ){
-    		return $this->sendP2PMsgToIMService($to, $from, self::GREETING_WORDS);
+    		return $this->sendP2PMsgToIMService($to, $from, $this->randomItemInArray(ChatsController::$greeting_array));
     	}
     	
     	$intent = $this->getIntentService($content);
@@ -166,6 +172,10 @@ class ChatsController extends Controller
     	$result = base64_encode($result);
 
     	return $result;
+    }
+
+    private function randomItemInArray( $array ){
+    	return $array[rand(0, count($array)-1)];
     }
 
     public function getIntent(Request $request){
