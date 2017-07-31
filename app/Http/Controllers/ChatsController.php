@@ -14,8 +14,8 @@ class ChatsController extends Controller
 	const MS_INTENT_SCORE_BAR = 0.6;
 	const MS_KB_URL = 'https://westus.api.cognitive.microsoft.com/qnamaker/v2.0/knowledgebases/6243a453-88d2-4bce-a855-be626041b9ee/generateAnswer';
 
-	const ESPACE_GROUP_NAME_PREFIX = '[WeCloud-Experts-Online] ';
-	const LAST_WORDS = '我只诞生了3天，还不太明白您的意思，我为WeCloud战队加油!';
+	const ESPACE_GROUP_NAME_PREFIX = '[WeLink On Cloud] ';
+	const LAST_WORDS = '我只诞生了3天，还不太明白您的意思，我为 [WeLink On Cloud] 战队加油!';
 
 	public static $greeting_array = array(
 		'您好,今天天气不错，我可以为你做点什么呢？',
