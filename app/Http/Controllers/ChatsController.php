@@ -163,7 +163,7 @@ class ChatsController extends Controller
 		    'targetAccount' => $to,
 		    'msgType' => '0',
 		    'senderType' => 0,
-		    'appID' => '1',
+		    'appID' => '2',
 		    "content" => $this->buildIMConent($content),
 		);
 
