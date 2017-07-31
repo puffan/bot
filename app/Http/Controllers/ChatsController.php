@@ -69,7 +69,8 @@ class ChatsController extends Controller
     	if(self::INTENT_FIND_EXPERTS == $intent){
     		// create group
     		$newGroupName = self::ESPACE_GROUP_NAME_PREFIX;
-    		$newGroupId = $this->createIMGroupService($newGroupName, $expertsPool, $from);
+    		//$newGroupId = $this->createIMGroupService($newGroupName, $expertsPool, $from);
+    		$newGroupId = "95144548";
     		// send group card
     		$this->sendIMCardService($to, $from, $newGroupName, $newGroupId);
     	}else if(self::INTENT_GREETING == $intent){
