@@ -81,9 +81,10 @@ class ChatsController extends Controller
     	}else{
     		$answer = $this->getKBService($content);
 
-    		if( !isset($answer) ){
+    		if( !isset($answer) || 'No good match found in the KB' == $answer ){
     			$answer = self::LAST_WORDS;
     		}
+    		
     		$this->doTranslateAndPushToWall('Rbot', $answer);
             return $this->sendP2PMsgToIMService($to, $from, $answer);
     	}
