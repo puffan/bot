@@ -238,7 +238,7 @@ class ChatsController extends Controller
     		"content" => $content,
     	);
 
-    	$trans = $from .':'. $this->doMSTranslate($content);
+    	$trans = $this->doMSTranslate($content);
     	$result['en'] = array(
     		"sender" => $from,
     		"content" => $trans,
