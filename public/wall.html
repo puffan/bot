@@ -24,7 +24,7 @@ body{font-size: 20px;}
           url : "http://bot-srv.azurewebsites.net/v1/walls",
           dataType : "json",
           success : function(data){
-            $("body").prepend('<div class="item-box"><div class="box-l">' + data.cn.sender + ',' + data.cn.content + '</div><div class="box-r">' + data.en.sender + ',' + data.en.content + '</div></div>');
+            $("body").prepend('<div class="item-box"><div class="box-l">' + data.cn.sender + ':' + data.cn.content + '</div><div class="box-r">' + data.en.sender + ':' + data.en.content + '</div></div>');
           },  
           error:function(){  
              console.log("no date!")
