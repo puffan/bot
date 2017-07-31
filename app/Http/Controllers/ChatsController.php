@@ -6,6 +6,7 @@ use Laravel\Lumen\Routing\Controller;
 use Illuminate\Http\Request;
 use \Curl\Curl;
 use \Cache;
+use Illuminate\Support\Facades\Redis;
 
 class ChatsController extends Controller
 {
@@ -13,6 +14,8 @@ class ChatsController extends Controller
 	const MS_INTENT_URL = 'https://southeastasia.api.cognitive.microsoft.com/luis/v2.0/apps/a2367e9b-eb53-428f-ab39-6649d7e67476';
 	const MS_INTENT_SCORE_BAR = 0.6;
 	const MS_KB_URL = 'https://westus.api.cognitive.microsoft.com/qnamaker/v2.0/knowledgebases/6243a453-88d2-4bce-a855-be626041b9ee/generateAnswer';
+	const MS_TOKEN_URL = 'https://api.cognitive.microsoft.com/sts/v1.0/issueToken';
+	const MS_TRANSLATE_URL = 'https://api.microsofttranslator.com/V2/Http.svc/Translate';
 
 	const ESPACE_GROUP_NAME_PREFIX = '[WeLink On Cloud] ';
 	const LAST_WORDS = '我只诞生了3天，还不太明白您的意思，我为 [WeLink On Cloud] 战队加油!';
@@ -48,6 +51,8 @@ class ChatsController extends Controller
     	if( isset($greeting) && $greeting === true ){
     		return $this->sendP2PMsgToIMService($to, $from, $this->randomItemInArray(ChatsController::$greeting_array));
     	}
+
+    	$this->doTranslateAndPushToWall($from, $content);
     	
     	$intent = $this->getIntentService($content);
 
@@ -59,15 +64,17 @@ class ChatsController extends Controller
     		$this->sendIMCardService($to, $from, $newGroupName, $newGroupId);
     	}else if(self::INTENT_GREETING == $intent){
     		// TODO:say hello
-    		return $this->sendP2PMsgToIMService($to, $from, $this->randomItemInArray(ChatsController::$greeting_array));
+    		$answer = $this->randomItemInArray(ChatsController::$greeting_array);
+    		$this->doTranslateAndPushToWall('Rbot', $answer);
+    		return $this->sendP2PMsgToIMService($to, $from, $answer);
     	}else{
     		$answer = $this->getKBService($content);
 
-    		if( isset($answer) ){
-    			return $this->sendP2PMsgToIMService($to, $from, $answer);
-    		}else{
-    			return $this->sendP2PMsgToIMService($to, $from, self::LAST_WORDS);
+    		if( !isset($answer) ){
+    			$answer = self::LAST_WORDS;
     		}
+    		$this->doTranslateAndPushToWall('Rbot', $answer);
+            return $this->sendP2PMsgToIMService($to, $from, $answer);
     	}
 
     	// else if(self::INTENT_FIND_KNOWLEDGE == $intent){
@@ -223,6 +230,88 @@ class ChatsController extends Controller
     	$result = base64_encode($result);
 
     	return $result;
+    }
+
+    private function doTranslateAndPushToWall($from, $content){
+    	$result['cn'] = array(
+    		"sender" => $from,
+    		"content" => $content,
+    	);
+
+    	$trans = $from .':'. $this->doMSTranslate($content);
+    	$result['en'] = array(
+    		"sender" => $from,
+    		"content" => $trans,
+    	);
+
+    	$cache_key = self::CACHE_KEY_PREFIX.'_QUEUE';
+    	Redis::lpush($cache_key, json_encode($result));
+    }
+
+    public function doPullToWall(){
+    	$cache_key = self::CACHE_KEY_PREFIX.'_QUEUE';
+    	$current = Redis::rpop($cache_key);
+    	echo($current);
+    }
+
+    private function doMSTranslate($content) {
+    	$cache_key = self::CACHE_KEY_PREFIX.'_TRANS_'.md5($content);
+    	$trans = "None";
+    	$inCache = Cache::get($cache_key);
+
+    	if( isset($inCache) ){
+    		$trans = $inCache;
+    	}else{
+    		$appid = 'Bearer'.' '.$this->issueMSToken();
+	    	$data = array(
+			    'appid' => $appid,
+			    'to' => 'en',
+			    'contentType' => 'text/plain',
+			    'text' => $content,
+			);
+
+			$curl = new Curl();
+			$curl->setHeader('Content-Type', 'application/json');
+			$curl->setOpt ( CURLOPT_SSL_VERIFYPEER, false );
+			$curl->get(self::MS_TRANSLATE_URL, $data);
+			$result = $curl->response;
+			$trans = $result[0]->__toString();
+
+			var_dump($trans);
+
+			if( !isset($trans) ){
+				$trans = 'None';
+			}
+			Cache::put($cache_key, $trans, 720);
+    	}
+		return $trans;
+    }
+
+    private function issueMSToken(){
+    	$cache_key_token = self::CACHE_KEY_PREFIX.'_TOKEN';
+    	$token = "None";
+    	$tokenInCache = Cache::get($cache_key_token);
+
+    	if( isset($tokenInCache) ){
+    		$token = $tokenInCache;
+    	}else{
+    		$curl = new Curl();
+
+			$curl->setHeader('Ocp-Apim-Subscription-Key', 'b5ecd102faf34fcc9358067b44f66c15');
+			$curl->setHeader('Content-Type', 'application/json');
+			$curl->setHeader('Accept', 'application/jwt');
+			$curl->setOpt ( CURLOPT_SSL_VERIFYPEER, false );
+			$curl->post(self::MS_TOKEN_URL);
+			$curl->close();
+
+			$token = $curl->response;
+
+			if( !isset($token) ){
+				$token = 'None';
+			}
+			Cache::put($cache_key_token, $token, 5);
+    	}
+    	return $token;
     }
 
     private function randomItemInArray( $array ){

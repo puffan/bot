@@ -40,3 +40,5 @@ $app->post('/v1/imgroupcard', 'ChatsController@sendIMGroupCard');
 $app->get('/v1/intents', 'ChatsController@getIntent');
 
 $app->get('/v1/answers', 'ChatsController@getAnswer');
+
+$app->get('/v1/walls', 'ChatsController@doPullToWall');
