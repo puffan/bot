@@ -35,6 +35,16 @@ class ChatsController extends Controller
 	public function chat(Request $request) {
 		$expertsPool = array(
 		    "z00187187",
+		    "w00231836",
+		    "l00256456",
+		    "w00186884",
+		    "c00300205",
+		    "w00263772",
+		    "z00345116",
+		    "x00305105",
+		    "r00191512",
+		    "b00313079",
+		    "x00172071",
 	    );
 
     	$this->validate($request, [
