@@ -17,7 +17,7 @@ class ChatsController extends Controller
 	const MS_TOKEN_URL = 'https://api.cognitive.microsoft.com/sts/v1.0/issueToken';
 	const MS_TRANSLATE_URL = 'https://api.microsofttranslator.com/V2/Http.svc/Translate';
 
-	const ESPACE_GROUP_NAME_PREFIX = '[WeLink On Cloud] ';
+	const ESPACE_GROUP_NAME_PREFIX = '[WeLink On Cloud] 服务支持群组';
 	const LAST_WORDS = '我只诞生了3天，还不太明白您的意思，我为 [WeLink On Cloud] 战队加油!';
 
 	public static $greeting_array = array(
@@ -163,7 +163,7 @@ class ChatsController extends Controller
 		    'targetAccount' => $to,
 		    'msgType' => '0',
 		    'senderType' => 0,
-		    'appID' => '3',
+		    'appID' => '1',
 		    "content" => $this->buildIMConent($content),
 		);
 
