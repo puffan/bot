@@ -18,7 +18,7 @@ class ChatsController extends Controller
 	const MS_TRANSLATE_URL = 'https://api.microsofttranslator.com/V2/Http.svc/Translate';
 
 	const ESPACE_GROUP_NAME_PREFIX = '[WeLink On Cloud] 服务支持群组';
-	const LAST_WORDS = '我只诞生了3天，还不太明白您的意思，我为 [WeLink On Cloud] 战队加油!';
+	const LAST_WORDS = '我只诞生了3天，还不太明白您的意思，我为 [We+] 战队加油!';
 
 	public static $greeting_array = array(
 		'您好,今天天气不错，我可以为你做点什么呢？',
