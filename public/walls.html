@@ -38,7 +38,7 @@ body{font-size: 20px; background: url(bg.jpg) repeat-x; background-size: cover;}
 					}
 					
 						
-						$("body").prepend('<div class="item-box"><div class="box-l">' + data.cn.sender + ':' + data.cn.content + '</div><div class="box-r">' + data.en.sender + ':' + data.en.content + '</div></div>');
+						$("body").prepend('<div class="item-box"><div class="box-l">' + data.cn.sender + ' : ' + data.cn.content + '</div><div class="box-r">' + data.en.sender + ' : ' + data.en.content + '</div></div>');
 						$(".item-box").eq(0).slideDown();
 					},  
 					error:function(){  
