@@ -41,4 +41,4 @@ $app->get('/v1/intents', 'ChatsController@getIntent');
 
 $app->get('/v1/answers', 'ChatsController@getAnswer');
 
-$app->get('/v1/walls', 'ChatsController@doPullToWall');
+$app->get('/v2/walls', 'ChatsController@doPullToWall');
